@@ -1,24 +1,81 @@
-import logo from './logo.svg';
-import './App.css';
+import { lazy, Suspense } from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import Home from './components/Home';
+import About from './components/About';
+import Services from './components/Services';
+import Contact from './components/Contact';
+import LayoutPage from './components/LayoutPage';
+
+// Lazy load nested components for services
+const Consulting = lazy(() => import('./components/Consulting'));
+const Development = lazy(() => import('./components/Development'));
+const Employee = lazy(()=>import('./components/Employee'));
+const Customer = lazy(()=> import('./components/Customer'));
+
+//Lazy load sub nested component
+const Daily = lazy(()=> import('./components/Daily'));
+const Monthly = lazy(()=>import('./components/Monthly'));
+
 
 function App() {
+  const appRouter = createBrowserRouter([
+    {
+      path:"/",
+      element:<LayoutPage/>,
+      children:[
+        {
+          path:"/",
+          element:<Home/>,
+        },
+        {
+          path:"/about",
+          element:<About/>,
+        },
+        {
+          path:"/services",
+          element:<Services/>,
+          children:[
+            {
+              path:"/services/consulting",
+              element:<Consulting/>,
+            },
+            {
+              path:"/services/development",
+              element:<Development/>,
+            }
+          ]
+        },
+        {
+          path:"/contact",
+          element:<Contact/>,
+          children:[
+            {
+              path:"/contact/employee",
+              element:<Employee/>,
+            },
+            {
+              path:"/contact/customer",
+              element:<Customer/>,
+              children:[
+                {
+                  path:"/contact/customer/daily",
+                  element:<Daily/>,
+                },
+                {
+                  path:"/contact/customer/monthly",
+                  element:<Monthly/>,
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <Suspense fallback={<div>Loading...</div>}> 
+      <RouterProvider router={appRouter}/>
+      </Suspense>
   );
 }
 
